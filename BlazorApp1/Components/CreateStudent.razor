@@ -1,0 +1,48 @@
+@page "/students/create"
+@inject Services.StudentsApiClient ApiClient
+@inject NavigationManager NavManager
+@using apbd10.DTOs
+
+<h3>Create Student</h3>
+
+<EditForm Model="@student" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Index Number:</label>
+        <InputText @bind-Value="student.IndexNumber" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>First Name:</label>
+        <InputText @bind-Value="student.FirstName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Last Name:</label>
+        <InputText @bind-Value="student.LastName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Email:</label>
+        <InputText @bind-Value="student.Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Semester (1-8):</label>
+        <InputNumber @bind-Value="student.Semester" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Student</button>
+</EditForm>
+
+@code {
+    private StudentDto student = new();
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await ApiClient.CreateStudentAsync(student);
+        if (response.IsSuccessStatusCode)
+        {
+            var createdStudent = await response.Content.ReadFromJsonAsync<StudentDto>();
+            NavManager.NavigateTo($"/students/{createdStudent?.Id}");
+        }
+    }
+}

@@ -1,0 +1,47 @@
+@using apbd10.DTOs
+@page "/students"
+@inject Services.StudentsApiClient ApiClient
+
+<h3>Students</h3>
+
+@if (students == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!students.Any())
+{
+    <p>No students found.</p>
+}
+else
+{
+    <DataTable Items="students">
+        <TableHeader>
+            <th>ID</th>
+            <th>Index</th>
+            <th>Name</th>
+            <th>Action</th>
+        </TableHeader>
+        <RowTemplate Context="student">
+            <td>@student.Id</td>
+            <td>@student.IndexNumber</td>
+            <td>@student.FirstName @student.LastName</td>
+            <td><a href="/students/@student.Id">View Details</a></td>
+        </RowTemplate>
+    </DataTable>
+}
+
+@code {
+    private List<StudentDto>? students;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            students = await ApiClient.GetStudentsAsync();
+        }
+        catch (Exception)
+        {
+            // Handle API error
+        }
+    }
+}

@@ -1,0 +1,67 @@
+@page "/students/{id:int}"
+@inject Services.StudentsApiClient ApiClient
+@inject Services.StateContainer State
+@inject IJSRuntime JS
+@using apbd10.DTOs
+
+<h3>Student Details</h3>
+
+@if (student == null)
+{
+    <p><em>Loading student details...</em></p>
+}
+else
+{
+    <p><strong>Name:</strong> @student.FirstName @student.LastName</p>
+    <p>
+        <strong>Email:</strong> @student.Email 
+        <button class="btn btn-sm btn-secondary" @onclick="CopyEmail">Copy Email</button>
+    </p>
+
+    <button class="btn btn-success" @onclick="ObserveStudent">Mark as Observed</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private StudentDto? student;
+    private IJSObjectReference? module;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        student = await ApiClient.GetStudentAsync(Id);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/utils.js");
+        }
+    }
+
+    private void ObserveStudent()
+    {
+        if (student != null)
+        {
+            State.AddObservedStudent(student);
+        }
+    }
+
+    private async Task CopyEmail()
+    {
+        if (module is not null && student is not null)
+        {
+            await module.InvokeVoidAsync("copyToClipboard", student.Email);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+        {
+            await module.DisposeAsync();
+        }
+    }
+}

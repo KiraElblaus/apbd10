@@ -1,0 +1,41 @@
+﻿@inherits LayoutComponentBase
+@inject Services.StateContainer State
+
+<div class="page">
+    <div class="sidebar">
+        <nav class="flex-column">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">Home</NavLink>
+            <NavLink class="nav-link" href="/students">Students List</NavLink>
+            <NavLink class="nav-link" href="/students/create">Create Student</NavLink>
+        </nav>
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <span>Observed Students: @State.ObservedStudents.Count</span>
+        </div>
+
+        <article class="content px-4">
+            <ErrorBoundary>
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent Context="ex">
+                    <div class="alert alert-danger">An unexpected error occurred: @ex.Message</div>
+                </ErrorContent>
+            </ErrorBoundary>
+        </article>
+    </main>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
+    }
+}
